@@ -19,7 +19,9 @@ class Doctor(db.Model):
     reviews = db.relationship('Review', backref='doctor', lazy=True)
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        ans = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        ans["reviews"] = [review.as_dict() for review in self.reviews]
+        return ans
 
 
 class Review(db.Model):
@@ -53,22 +55,11 @@ def add_review(doctorid):
     db.session.add(review)
     db.session.commit()
 
-
     doctor = Doctor.query.filter_by(id=doctorid).first()
-    # review = Review(description=data['description'])
-    # db.session.add(review)
-    # db.session.commit()
-    # # print(type(doctor))
     doctor.reviews.append(review)
-    # # print(doctor)
 
-    
-
-    reviews = Review.query.all()
-    return jsonify([review.as_dict() for review in reviews])
-
-    # print('Data Received: "{data}"'.format(data=data))
-    # return "Request Processed.\n"
+    return "Added review \"" + str(data['description']) + "\" " \
+            "to doctor " + doctor.name + " (id: " + str(doctor.id) + ")"
 
 # List all doctors and their reviews
 @app.route('/doctors', methods=['GET'])
