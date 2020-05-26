@@ -1,32 +1,108 @@
-from flask import Flask, request
+from dataclasses import dataclass
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-
+database_uri_mysql = "mysql://sql9343372:M9n5hMmtQP@sql9.freemysqlhosting.net:3306/sql9343372"
+database_uri_postgres = "postgres://kqpakbfg:HKfT25s4G3yf89SxJQXkH-pxVmIwsWnS@ruby.db.elephantsql.com:5432/kqpakbfg"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:103Mojonera@localhost:5432/doctor_api"
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri_postgres
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 db = SQLAlchemy(app)
 
+
 class Doctor(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(50))
-    reviews = db.relationship('Review', backref='doctor',lazy = True)
+    # __tablename__ = 'doctor'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    reviews = db.relationship('Review', backref='doctor', lazy=True)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class Review(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
+    # __tablename__ = 'review'
+    id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(120), nullable=False)
-    doctor = db.Column(db.Integer, db.ForeignKey('doctor.id'),nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-@app.route('/post', methods=['POST'])
-def post_route():
-    if request.method == 'POST':
+# Create a doctor
+@app.route('/doctors', methods=['POST'])
+def add_doctor():
+
+    data = request.get_json()  # data: dict
+    doctor = Doctor(name=data['name'])
+    db.session.add(doctor)
+    db.session.commit()
+
+    return "Added doctor " + str(data['name'])
+
+# Add a review to existing doctor
+@app.route('/doctors/<doctorid>/reviews', methods=['POST'])
+def add_review(doctorid):
+
+    data = request.get_json()
+
+    review = Review(description=data['description'], doctor_id=doctorid)
+    db.session.add(review)
+    db.session.commit()
+
+
+    doctor = Doctor.query.filter_by(id=doctorid).first()
+    # review = Review(description=data['description'])
+    # db.session.add(review)
+    # db.session.commit()
+    # # print(type(doctor))
+    doctor.reviews.append(review)
+    # # print(doctor)
+
+    
+
+    reviews = Review.query.all()
+    return jsonify([review.as_dict() for review in reviews])
+
+    # print('Data Received: "{data}"'.format(data=data))
+    # return "Request Processed.\n"
+
+# List all doctors and their reviews
+@app.route('/doctors', methods=['GET'])
+def get_all_doctors():
+
+    doctors = Doctor.query.all()
+    return jsonify([doctor.as_dict() for doctor in doctors])
+
+# List a doctor and the review(s)
+@app.route('/doctors/<doctor_id>', methods=['GET'])
+def get_doctor():
+    if request.method == 'GET':
 
         data = request.get_json()
-        print(type(data))
-        x = dict(data)
-        print('dict x: ', x)
+
+        print('Data Received: "{data}"'.format(data=data))
+        return "Request Processed.\n"
+
+# Delete a review from a doctor
+@app.route('/doctors/<doctor_id>/reviews/<review_id>', methods=['DELETE'])
+def delete_review():
+    if request.method == 'DELETE':
+
+        data = request.get_json()
+
+        print('Data Received: "{data}"'.format(data=data))
+        return "Request Processed.\n"
+
+# Delete a doctor
+@app.route('/doctors/<doctor_id>', methods=['DELETE'])
+def delete_doctor():
+    if request.method == 'DELETE':
+
+        data = request.get_json()
 
         print('Data Received: "{data}"'.format(data=data))
         return "Request Processed.\n"
