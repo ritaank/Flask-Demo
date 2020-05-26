@@ -46,16 +46,16 @@ def add_doctor():
     return "Added doctor " + str(data['name'])
 
 # Add a review to existing doctor
-@app.route('/doctors/<doctorid>/reviews', methods=['POST'])
-def add_review(doctorid):
+@app.route('/doctors/<doctor_id>/reviews', methods=['POST'])
+def add_review(doctor_id):
 
     data = request.get_json()
 
-    review = Review(description=data['description'], doctor_id=doctorid)
+    review = Review(description=data['description'], doctor_id=doctor_id)
     db.session.add(review)
     db.session.commit()
 
-    doctor = Doctor.query.filter_by(id=doctorid).first()
+    doctor = Doctor.query.filter_by(id=doctor_id).first()
     doctor.reviews.append(review)
 
     return "Added review \"" + str(data['description']) + "\" " \
@@ -69,31 +69,35 @@ def get_all_doctors():
     return jsonify([doctor.as_dict() for doctor in doctors])
 
 # List a doctor and the review(s)
-@app.route('/doctors/<doctorid>', methods=['GET'])
-def get_doctor(doctorid):
+@app.route('/doctors/<doctor_id>', methods=['GET'])
+def get_doctor(doctor_id):
 
-    doctor = Doctor.query.filter_by(id=doctorid).first()
+    doctor = Doctor.query.filter_by(id=doctor_id).first()
     return jsonify(doctor.as_dict())
 
 # Delete a review from a doctor
 @app.route('/doctors/<doctor_id>/reviews/<review_id>', methods=['DELETE'])
-def delete_review():
-    if request.method == 'DELETE':
+def delete_review(doctor_id, review_id):
 
-        data = request.get_json()
+    doctor = Doctor.query.filter_by(id=doctor_id).first()
+    review = Review.query.filter_by(id=review_id).first()
+    db.session.delete(review)
+    db.session.commit()
 
-        print('Data Received: "{data}"'.format(data=data))
-        return "Request Processed.\n"
+    return "Deleted review \"" + str(review.description) + "\" " \
+            "from doctor " + doctor.name + " (id: " + str(doctor.id) + ")"
 
 # Delete a doctor
 @app.route('/doctors/<doctor_id>', methods=['DELETE'])
-def delete_doctor():
-    if request.method == 'DELETE':
+def delete_doctor(doctor_id):
 
-        data = request.get_json()
+    doctor = Doctor.query.filter_by(id=doctor_id).first()
+    for review in doctor.reviews:
+        db.session.delete(review)
+    db.session.delete(doctor)
+    db.session.commit()
 
-        print('Data Received: "{data}"'.format(data=data))
-        return "Request Processed.\n"
+    return "Deleted doctor " + doctor.name + " (id: " + str(doctor.id) + ")"
 
 #flask run -h localhost -p 3000
 
