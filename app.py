@@ -69,14 +69,11 @@ def get_all_doctors():
     return jsonify([doctor.as_dict() for doctor in doctors])
 
 # List a doctor and the review(s)
-@app.route('/doctors/<doctor_id>', methods=['GET'])
-def get_doctor():
-    if request.method == 'GET':
+@app.route('/doctors/<doctorid>', methods=['GET'])
+def get_doctor(doctorid):
 
-        data = request.get_json()
-
-        print('Data Received: "{data}"'.format(data=data))
-        return "Request Processed.\n"
+    doctor = Doctor.query.filter_by(id=doctorid).first()
+    return jsonify(doctor.as_dict())
 
 # Delete a review from a doctor
 @app.route('/doctors/<doctor_id>/reviews/<review_id>', methods=['DELETE'])
