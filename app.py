@@ -19,7 +19,7 @@ class Doctor(db.Model):
     __tablename__ = 'doctor'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    reviews = db.relationship('Review', backref='doctor', lazy=True)
+    reviews = db.relationship('Review', backref='doctor', lazy=True) #allows for parent-child relationship
 
     #returns dictionary output of doctor and all reviews of that doctor
     def as_dict(self):
@@ -32,7 +32,7 @@ class Review(db.Model):
     __tablename__ = 'review'
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(120), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False) #each review is assigned to a doctor by id
 
     #returns dictionary of review object
     def as_dict(self):
