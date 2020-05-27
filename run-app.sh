@@ -1,7 +1,15 @@
 #! /bin/bash
 
-sudo su
-apt-get -y install python3
-apt-get -y install python3-pip
+sudo apt-get -y install python3
+sudo add-apt-repository universe
+sudo apt update
+sudo apt -y install python3-pip
+
+sudo apt -y install python3-flask
+sudo apt-get -y install python3-sqlalchemy
+pip3 install Flask-SQLAlchemy
+pip3 install -r requirements.txt
 python3 -m pip install -R requirements.txt
+
+export FLASK_APP="app.py"
 flask run -h localhost -p $1
