@@ -5,9 +5,10 @@ import sqlalchemy.sql.default_comparator
 ## Configuration
 
 app = Flask(__name__)
-database_uri_postgres = "postgres://kqpakbfg:HKfT25s4G3yf89SxJQXkH-pxVmIwsWnS@ruby.db.elephantsql.com:5432/kqpakbfg"
+db_uri_sqlite = 'sqlite:///db.sqlite3'
+# db_uri_postgres = "postgres://kqpakbfg:HKfT25s4G3yf89SxJQXkH-pxVmIwsWnS@ruby.db.elephantsql.com:5432/kqpakbfg"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = database_uri_postgres
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri_sqlite
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 db = SQLAlchemy(app)
