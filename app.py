@@ -5,7 +5,6 @@ import sqlalchemy.sql.default_comparator
 ## Configuration
 
 app = Flask(__name__)
-# database_uri_mysql = "mysql://sql9343372:M9n5hMmtQP@sql9.freemysqlhosting.net:3306/sql9343372"
 database_uri_postgres = "postgres://kqpakbfg:HKfT25s4G3yf89SxJQXkH-pxVmIwsWnS@ruby.db.elephantsql.com:5432/kqpakbfg"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri_postgres
@@ -24,7 +23,7 @@ class Doctor(db.Model):
     #returns dictionary output of doctor and all reviews of that doctor
     def as_dict(self):
         ans = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-        ans["reviews"] = [review.as_dict() for review in self.reviews]
+        ans["reviews"] = [review.as_dict() for review in self.reviews] #adding reviews
         return ans
 
 
@@ -113,17 +112,3 @@ def delete_doctor(doctor_id):
 
     return "Deleted doctor " + doctor.name + " (id: " + str(doctor.id) + ")"
 
-if __name__== "__main__":
-    app.run()
-
-
-#flask run -h localhost -p 3000
-
-# from application import create_app
-
-# app = create_app()
-
-# if __name__ == "__main__":
-#     app.run(host='0.0.0.0')
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/cars_api"
