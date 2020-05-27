@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy.sql.default_comparator
 
 ## Configuration
 
@@ -111,6 +112,10 @@ def delete_doctor(doctor_id):
     db.session.commit()
 
     return "Deleted doctor " + doctor.name + " (id: " + str(doctor.id) + ")"
+
+if __name__== "__main__":
+    app.run()
+
 
 #flask run -h localhost -p 3000
 
