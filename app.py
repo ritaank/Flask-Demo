@@ -6,7 +6,6 @@ import sqlalchemy.sql.default_comparator
 
 app = Flask(__name__)
 db_uri_sqlite = 'sqlite:///db.sqlite3'
-# db_uri_postgres = "postgres://kqpakbfg:HKfT25s4G3yf89SxJQXkH-pxVmIwsWnS@ruby.db.elephantsql.com:5432/kqpakbfg"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri_sqlite
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
@@ -21,7 +20,6 @@ class Doctor(db.Model):
     name = db.Column(db.String(50), nullable=False)
     reviews = db.relationship('Review', backref='doctor', lazy=True) #allows for parent-child relationship
 
-    #returns dictionary output of doctor and all reviews of that doctor
     def as_dict(self):
         ans = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         ans["reviews"] = [review.as_dict() for review in self.reviews] #adding reviews
@@ -34,7 +32,6 @@ class Review(db.Model):
     description = db.Column(db.String(120), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False) #each review is assigned to a doctor by id
 
-    #returns dictionary of review object
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
